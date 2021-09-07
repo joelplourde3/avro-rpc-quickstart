@@ -1,0 +1,1 @@
+{"type":"record","name":"Money","namespace":"namespace","fields":[{"name":"currency","type":"string"},{"name":"value","type":"number"}]}

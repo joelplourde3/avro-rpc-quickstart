@@ -1,0 +1,1 @@
+{"type":"record","name":"Coding","namespace":"namespace","fields":[{"name":"system","type":"string"},{"name":"code","type":"string"},{"name":"userSelected","type":"boolean"},{"name":"display","type":"string"},{"name":"version","type":"string"}]}
