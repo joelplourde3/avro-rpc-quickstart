@@ -1,1 +1,1 @@
-{"type":"record","name":"Quantity","namespace":"namespace","fields":[{"type":"enum","name":"???","symbols":"[\"<\",\"<=\",\">=\",\">\"]"},{"name":"unit","type":"string"},{"name":"system","type":"string"},{"name":"code","type":"string"},{"name":"value","type":"number"}]}
+{"type":"record","name":"Quantity","namespace":"namespace","fields":[{"name":"value","type":"number"}]}
