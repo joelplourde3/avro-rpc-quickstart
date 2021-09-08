@@ -1,1 +1,1 @@
-{"type":"record","name":"Money","namespace":"namespace","fields":[{"name":"value","type":"number"}]}
+{"type":"record","name":"Money","doc":"An amount of economic utility in some recognized currency.","namespace":"namespace","fields":[{"name":"currency","type":["null","string"]},{"name":"value","type":["null","number"]}],"default":null}

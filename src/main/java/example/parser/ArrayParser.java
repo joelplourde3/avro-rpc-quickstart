@@ -1,6 +1,7 @@
 package example.parser;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import example.definition.Property;
+import example.utils.JsonObjectUtils;
 
 import javax.json.JsonObject;
 import java.util.ArrayList;
@@ -15,17 +16,18 @@ public class ArrayParser implements IParser {
     }});
 
     @Override
-    public boolean canParse(JsonNode node) {
-        return node.has("items");
+    public boolean canParse(Property property) {
+        return property.getJsonNode().has("items");
     }
 
     @Override
-    public JsonObject parseField(String identifier, JsonNode node) {
-        JsonNode root = node.get("items");
+    public JsonObject parseField(String identifier, Property property) {
+        // TODO check if this property is required or not somehow
+        Property rootProperty = new Property(property.getJsonNode().get("items"), false);
         JsonObject jsonObject = null;
         for (IParser fieldParser : innerParser) {
-            if (fieldParser.canParse(root)) {
-                jsonObject = fieldParser.parseField(identifier, root);
+            if (fieldParser.canParse(rootProperty)) {
+                jsonObject = fieldParser.parseField(identifier, rootProperty);
                 break;
             }
         }
@@ -34,6 +36,6 @@ public class ArrayParser implements IParser {
             throw new RuntimeException("We do not know how to parse this node yet.");
         }
 
-        return jsonObject;
+        return JsonObjectUtils.createArray(jsonObject);
     }
 }

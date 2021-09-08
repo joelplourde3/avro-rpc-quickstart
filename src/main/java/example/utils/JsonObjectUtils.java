@@ -1,45 +1,77 @@
 package example.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import example.repository.DefinitionRepository;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
+import javax.json.*;
 
 public class JsonObjectUtils {
 
-    private JsonObjectUtils() {}
+    private JsonObjectUtils() {
+    }
 
-    public static JsonObject createRecord(String name, JsonArray fields) {
-        return Json.createObjectBuilder()
+    public static JsonObject createRecord(String name, String description, JsonArray fields, boolean required) {
+        JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder()
                 .add("type", "record")
                 .add("name", name)
+                .add("doc", description)
                 .add("namespace", "namespace")
-                .add("fields", fields)
-                .build();
+                .add("fields", fields);
+
+        if (required) {
+            jsonObjectBuilder.add("default", "{}");
+        } else {
+            jsonObjectBuilder.add("default", JsonObject.NULL);
+        }
+        return jsonObjectBuilder.build();
     }
 
-    public static JsonObject createEnum(JsonNode root) {
-        return Json.createObjectBuilder()
+    public static JsonObject createEnum(String parentIdentifier, JsonNode root) {
+        JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+        root.get("enum").forEach(symbol -> jsonArrayBuilder.add(symbol.asText()));
+        JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder()
                 .add("type", "enum")
-                .add("name", "???")
-                .add("symbols", root.get("enum").toString())
-                .build();
+                .add("name", ConverterUtils.capitalizeWord(parentIdentifier));
+
+        if (root.has("description")) {
+            jsonObjectBuilder.add("doc", root.get("description").asText());
+        }
+        return jsonObjectBuilder.add("symbols", jsonArrayBuilder.build()).build();
     }
 
-    public static JsonObject createArray(JsonNode root) {
+    public static JsonObject createArray(JsonObject jsonObject) {
         return Json.createObjectBuilder()
                 .add("type", "array")
-                .add("items", DefinitionRepository.getReferenceObject(root.get("items"), "_"))
-                .add("default", "[]") // TODO fill-in the defaault value if any.
+                .add("items", jsonObject)
+                .add("default", "[]")
                 .build();
     }
 
-    public static JsonObject createField(String name, JsonObject jsonObject) {
-        return Json.createObjectBuilder()
-                .add("name", name)
-                .add("type", jsonObject)
-                .build();
+    public static JsonObject createField(String name, JsonObject jsonObject, boolean required) {
+        JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder()
+                .add("name", name);
+
+        if (required) {
+            jsonObjectBuilder.add("type", jsonObject);
+        } else {
+            jsonObjectBuilder.add("type", Json.createArrayBuilder()
+                    .add("null")
+                    .add(jsonObject)
+                    .build());
+        }
+        return jsonObjectBuilder.build();
+    }
+
+    public static JsonObject createConst(String name, String type, boolean required) {
+        JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder()
+                .add("name", name);
+        if (required) {
+            jsonObjectBuilder.add("type", type);
+        } else {
+            jsonObjectBuilder.add("type", Json.createArrayBuilder()
+                    .add("null")
+                    .add(type)
+                    .build());
+        }
+        return jsonObjectBuilder.build();
     }
 }

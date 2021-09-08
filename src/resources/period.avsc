@@ -1,0 +1,1 @@
+{"type":"record","name":"Period","doc":"A time period defined by a start and end date and optionally time.","namespace":"namespace","fields":[{"name":"start","type":["null","string"]},{"name":"end","type":["null","string"]}],"default":null}
