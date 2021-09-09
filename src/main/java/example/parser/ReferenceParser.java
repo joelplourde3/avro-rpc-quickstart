@@ -2,6 +2,7 @@ package example.parser;
 
 import example.definition.Property;
 import example.repository.DefinitionRepository;
+import example.utils.Constant;
 
 import javax.json.JsonObject;
 
@@ -9,7 +10,7 @@ public class ReferenceParser implements IParser {
 
     @Override
     public boolean canParse(Property property) {
-        return property.getJsonNode().has("$ref");
+        return property.getJsonNode().has(Constant.REF);
     }
 
     @Override

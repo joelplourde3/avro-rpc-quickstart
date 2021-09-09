@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import example.definition.ComplexDefinition;
 import example.definition.IDefinition;
 import example.definition.PrimitiveDefinition;
-import example.definition.specificity.ExtensionDefinition;
-import example.definition.specificity.ReferenceDefinition;
-import example.definition.specificity.ResourceListDefinition;
-import example.definition.specificity.xHtmlDefinition;
+import example.definition.exception.UnknownDefinitionException;
+import example.definition.exception.UnknownReferenceException;
+import example.definition.specificity.*;
+import example.utils.Constant;
 import example.utils.ConverterUtils;
 
 import javax.json.JsonObject;
@@ -27,16 +27,16 @@ public class DefinitionRepository {
     public static void populateComplexDefinitions(JsonNode root) {
         for (Iterator<Map.Entry<String, JsonNode>> it = root.get("discriminator").get("mapping").fields(); it.hasNext(); ) {
             Map.Entry<String, JsonNode> entry = it.next();
-            ComplexDefinition complexDefinition = new ComplexDefinition(entry, root.get("definitions").get(entry.getKey()));
+            ComplexDefinition complexDefinition = new ComplexDefinition(entry, root.get(Constant.DEFINITIONS).get(entry.getKey()));
             complexDefinitions.put(complexDefinition.getIdentifier(), complexDefinition);
         }
     }
 
     public static void populatePrimitiveDefinitions(JsonNode root) {
-        for (Iterator<Map.Entry<String, JsonNode>> it = root.get("definitions").fields(); it.hasNext(); ) {
+        for (Iterator<Map.Entry<String, JsonNode>> it = root.get(Constant.DEFINITIONS).fields(); it.hasNext(); ) {
             Map.Entry<String, JsonNode> entry = it.next();
 
-            if (entry.getValue().has("type")) {
+            if (entry.getValue().has(Constant.TYPE)) {
                 PrimitiveDefinition primitiveDefinition = new PrimitiveDefinition(entry);
                 primitiveDefinitions.put(primitiveDefinition.getIdentifier(), primitiveDefinition);
             } else {
@@ -44,34 +44,14 @@ public class DefinitionRepository {
                 if ("Element".equalsIgnoreCase(entry.getKey())) {
                     continue;
                 }
-                // TODO do a factory here for the Tag and the IDefinition.
 
-                // xhtml
-                if ("xhtml".equalsIgnoreCase(entry.getKey())) {
-                    xHtmlDefinition xHtmlDefinition = new xHtmlDefinition(entry.getKey(), entry.getKey(), entry.getValue());
-                    specificDefinitions.put(xHtmlDefinition.getIdentifier(), xHtmlDefinition);
-                    continue;
+                if (SpecificDefinitionFactory.isSupported(entry.getKey())) {
+                    SpecificDefinition specialDefinition = SpecificDefinitionFactory.getSpecificDefinition(entry.getKey());
+                    specialDefinition.initialize(entry.getKey(), entry.getKey(), entry.getValue());
+                    specificDefinitions.put(specialDefinition.getIdentifier(), specialDefinition);
                 }
 
-                if ("Reference".equalsIgnoreCase(entry.getKey())) {
-                    ReferenceDefinition referenceDefinition = new ReferenceDefinition(entry.getKey(), entry.getKey(), entry.getValue());
-                    specificDefinitions.put(referenceDefinition.getIdentifier(), referenceDefinition);
-                    continue;
-                }
-
-                if ("Extension".equalsIgnoreCase(entry.getKey())) {
-                    ExtensionDefinition extensionDefinition = new ExtensionDefinition(entry.getKey(), entry.getKey(), entry.getValue());
-                    specificDefinitions.put(extensionDefinition.getIdentifier(), extensionDefinition);
-                    continue;
-                }
-
-                if ("ResourceList".equalsIgnoreCase(entry.getKey())) {
-                    ResourceListDefinition resourceListDefinition = new ResourceListDefinition(entry.getKey(), entry.getKey(), entry.getValue());
-                    specificDefinitions.put(resourceListDefinition.getIdentifier(), resourceListDefinition);
-                    continue;
-                }
-
-                if (entry.getValue().has("properties")) {
+                if (entry.getValue().has(Constant.PROPERTIES)) {
                     ComplexDefinition complexDefinition = new ComplexDefinition(entry, entry.getValue());
                     complexDefinition.generateProperties();
                     if (!complexDefinition.getProperties().isEmpty()) {
@@ -82,22 +62,16 @@ public class DefinitionRepository {
         }
     }
 
-    public static Map<String, ComplexDefinition> getComplexDefinitions() {
-        return complexDefinitions;
-    }
-
     public static ComplexDefinition getComplexDefinitionByIdentifier(String identifier) {
-        return Optional.ofNullable(complexDefinitions.get(identifier))
-                .orElseThrow(() -> new RuntimeException("Unknown ComplexDefinition, please verify: " + identifier));
+        return Optional.ofNullable(complexDefinitions.get(identifier)).orElseThrow(() -> new UnknownDefinitionException(identifier));
     }
 
     public static PrimitiveDefinition getPrimitiveDefinitionByIdentifier(String identifier) {
-        return Optional.ofNullable(primitiveDefinitions.get(identifier))
-                .orElseThrow(() -> new RuntimeException("Unknown ComplexDefinition, please verify: " + identifier));
+        return Optional.ofNullable(primitiveDefinitions.get(identifier)).orElseThrow(() -> new UnknownDefinitionException(identifier));
     }
 
-    public static JsonObject getReferenceObject(JsonNode root, String name, boolean required) {
-        String reference = ConverterUtils.parseReference(root);
+    public static JsonObject getReferenceObject(JsonNode node, String name, boolean required) {
+        String reference = ConverterUtils.parseReference(node);
         if (primitiveDefinitions.containsKey(reference)) {
             return primitiveDefinitions.get(reference).convertToJson(name, required);
         } else if (complexDefinitions.containsKey(reference)) {
@@ -105,7 +79,11 @@ public class DefinitionRepository {
         } else if (specificDefinitions.containsKey(reference)) {
             return specificDefinitions.get(reference).convertToJson(name, required);
         } else {
-            throw new RuntimeException("The reference object is not a known object OR this behaviour is not yet implemented by : " + reference);
+            throw new UnknownReferenceException(reference);
         }
+    }
+
+    public static Map<String, ComplexDefinition> getComplexDefinitions() {
+        return complexDefinitions;
     }
 }

@@ -12,6 +12,8 @@ public abstract class BaseDefinition implements IDefinition {
     private JsonNode definition;
     private JsonObject jsonObject;
 
+    protected BaseDefinition() {}
+
     protected BaseDefinition(String name, String identifier, JsonNode definition) {
         this.name = name;
         this.identifier = identifier;

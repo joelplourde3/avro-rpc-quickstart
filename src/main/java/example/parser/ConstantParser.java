@@ -1,6 +1,7 @@
 package example.parser;
 
 import example.definition.Property;
+import example.utils.Constant;
 import example.utils.JsonObjectUtils;
 
 import javax.json.JsonObject;
@@ -14,6 +15,6 @@ public class ConstantParser implements IParser {
 
     @Override
     public JsonObject parseField(String identifier, Property property) {
-        return JsonObjectUtils.createConst(identifier, "string", property.isRequired());
+        return JsonObjectUtils.createConst(identifier, Constant.STRING, property.isRequired());
     }
 }

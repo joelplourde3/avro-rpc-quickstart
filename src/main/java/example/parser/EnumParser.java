@@ -1,6 +1,7 @@
 package example.parser;
 
 import example.definition.Property;
+import example.utils.Constant;
 import example.utils.JsonObjectUtils;
 
 import javax.json.JsonObject;
@@ -9,7 +10,7 @@ public class EnumParser implements IParser {
 
     @Override
     public boolean canParse(Property property) {
-        return property.getJsonNode().has("enum");
+        return property.getJsonNode().has(Constant.ENUM);
     }
 
     @Override

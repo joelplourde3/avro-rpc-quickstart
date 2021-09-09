@@ -1,1 +1,1 @@
-{"type":"record","name":"Money","doc":"An amount of economic utility in some recognized currency.","namespace":"namespace","fields":[{"name":"currency","type":["null","string"]},{"name":"value","type":["null","number"]}],"default":null}
+{"type":"record","name":"Money","doc":"An amount of economic utility in some recognized currency.","namespace":"bio.ferlab.fhir","fields":[{"name":"currency","type":["null","string"]},{"name":"value","type":["null","number"]}],"default":null}

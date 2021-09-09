@@ -1,6 +1,8 @@
 package example.parser;
 
 import example.definition.Property;
+import example.definition.exception.UnknownParserException;
+import example.utils.Constant;
 import example.utils.JsonObjectUtils;
 
 import javax.json.JsonObject;
@@ -17,25 +19,17 @@ public class ArrayParser implements IParser {
 
     @Override
     public boolean canParse(Property property) {
-        return property.getJsonNode().has("items");
+        return property.getJsonNode().has(Constant.ITEMS);
     }
 
     @Override
     public JsonObject parseField(String identifier, Property property) {
         // TODO check if this property is required or not somehow
-        Property rootProperty = new Property(property.getJsonNode().get("items"), false);
-        JsonObject jsonObject = null;
-        for (IParser fieldParser : innerParser) {
-            if (fieldParser.canParse(rootProperty)) {
-                jsonObject = fieldParser.parseField(identifier, rootProperty);
-                break;
-            }
-        }
-
-        if (jsonObject == null) {
-            throw new RuntimeException("We do not know how to parse this node yet.");
-        }
-
-        return JsonObjectUtils.createArray(jsonObject);
+        Property rootProperty = new Property(property.getJsonNode().get(Constant.ITEMS), false);
+        return JsonObjectUtils.createArray(innerParser.stream()
+                .filter(parser -> parser.canParse(rootProperty))
+                .findFirst()
+                .orElseThrow(() -> new UnknownParserException(identifier))
+                .parseField(identifier, rootProperty));
     }
 }

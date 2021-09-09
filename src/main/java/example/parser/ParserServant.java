@@ -1,6 +1,7 @@
 package example.parser;
 
 import example.definition.Property;
+import example.definition.exception.UnknownParserException;
 
 import javax.json.JsonObject;
 import java.util.ArrayList;
@@ -20,18 +21,10 @@ public class ParserServant {
     private ParserServant() {}
 
     public static JsonObject parseField(String identifier, Property property) {
-        JsonObject jsonObject = null;
-        for (IParser fieldParser : parsers) {
-            if (fieldParser.canParse(property)) {
-                jsonObject = fieldParser.parseField(identifier, property);
-                break;
-            }
-        }
-
-        if (jsonObject == null) {
-            throw new RuntimeException("We do not know how to parse this node yet.");
-        }
-
-        return jsonObject;
+        return parsers.stream()
+                .filter(parser -> parser.canParse(property))
+                .findFirst()
+                .orElseThrow(() -> new UnknownParserException(identifier))
+                .parseField(identifier, property);
     }
 }

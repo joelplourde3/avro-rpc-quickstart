@@ -28,14 +28,20 @@ public class Tester {
                 DefinitionRepository.getComplexDefinitionByIdentifier(currentKey).convertToJson(currentKey, true);
                 saveDefinition(DefinitionRepository.getComplexDefinitionByIdentifier(currentKey));
                 supportedEntities.add(currentKey);
-            }
 
+                System.out.println("Supported Entity: " + currentKey);
+            }
             System.out.println("Supported Entities: " + supportedEntities.size());
             System.out.println("Unsupported Entities: " + unsupportedEntities.size());
         } catch(StackOverflowError stackOverflowError) {
             unsupportedEntities.add(currentKey);
             loadAll();
         }
+    }
+
+    public static void loadOne(String identifier) {
+        DefinitionRepository.getComplexDefinitionByIdentifier(identifier).convertToJson(identifier, true);
+        saveDefinition(DefinitionRepository.getComplexDefinitionByIdentifier(identifier));
     }
 
     private static void saveDefinition(BaseDefinition baseDefinition) {

@@ -1,6 +1,7 @@
 package example.definition;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import example.utils.Constant;
 import example.utils.JsonObjectUtils;
 
 import javax.json.JsonObject;
@@ -13,10 +14,9 @@ public class PrimitiveDefinition extends BaseDefinition {
 
     public PrimitiveDefinition(Map.Entry<String, JsonNode> entry) {
         super(entry.getKey(), entry.getKey(), entry.getValue());
-
-        setType(getDefinition().get("type").asText());  // TODO convert the format to an Avro primitive types.
-        if (getDefinition().has("pattern")) {
-            setPattern(getDefinition().get("pattern").asText());
+        setType(getDefinition().get(Constant.TYPE).asText());
+        if (getDefinition().has(Constant.PATTERN)) {
+            setPattern(getDefinition().get(Constant.PATTERN).asText());
         }
     }
 

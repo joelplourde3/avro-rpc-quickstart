@@ -7,21 +7,17 @@ public class ConverterUtils {
     private ConverterUtils() {}
 
     public static String parseReference(JsonNode jsonNode) {
-        return jsonNode.get("$ref").toString().replace("\"", "").replace("#/definitions/", "");
+        return jsonNode.get(Constant.REF).toString()
+                .replace("\"", "")
+                .replace("#/definitions/", "");
     }
 
     public static String parsePrimitiveType(String type) {
         type = type.replace("\"", "");
-        switch (type) {
-            case "number":
-                return "integer";
-            case "string":
-                return "string";
-            case "boolean":
-                return "boolean";
-            default:
-                throw new RuntimeException("Please verify this type: " + type);
+        if ("number".equals(type)) {
+            return "integer";
         }
+        return type;
     }
 
     public static String capitalizeWord(String word) {

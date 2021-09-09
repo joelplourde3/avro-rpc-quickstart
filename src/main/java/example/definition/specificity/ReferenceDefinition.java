@@ -1,32 +1,27 @@
 package example.definition.specificity;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import example.definition.BaseDefinition;
+import example.utils.Constant;
 import example.utils.JsonObjectUtils;
 
-import javax.json.*;
+import javax.json.Json;
+import javax.json.JsonObject;
 
-public class ReferenceDefinition extends BaseDefinition {
-
-    public ReferenceDefinition(String name, String identifier, JsonNode definition) {
-        super(name, identifier, definition);
-    }
+public class ReferenceDefinition extends SpecificDefinition {
 
     @Override
     public JsonObject convertToJson(String name, boolean required) {
-        JsonArray fields = Json.createArrayBuilder()
-                .add(JsonObjectUtils.createConst("reference", "string", false))
-                .add(JsonObjectUtils.createConst("type", "string", false))
-                .add(JsonObjectUtils.createConst("identifier", "string", false))
-                .add(JsonObjectUtils.createConst("display", "string", false))
-                .build();
-
+        // TODO add the required if any.
         return Json.createObjectBuilder()
-                .add("type", "record")
-                .add("name", name)
-                .add("namespace", "namespace")
-                .add("fields", fields)
-                .add("default", JsonObject.NULL) // TODO add the required if any.
+                .add(Constant.TYPE, Constant.RECORD)
+                .add(Constant.NAME, name)
+                .add(Constant.NAMESPACE, Constant.NAMESPACE_VALUE)
+                .add(Constant.FIELDS, Json.createArrayBuilder()
+                        .add(JsonObjectUtils.createConst("reference", Constant.STRING, false))
+                        .add(JsonObjectUtils.createConst("type", Constant.STRING, false))
+                        .add(JsonObjectUtils.createConst("identifier", Constant.STRING, false))
+                        .add(JsonObjectUtils.createConst("display", Constant.STRING, false))
+                        .build())
+                .add(Constant.DEFAULT, JsonObject.NULL)
                 .build();
     }
 }

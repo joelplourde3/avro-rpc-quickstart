@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import javax.json.*;
 
+import static javax.json.JsonValue.NULL;
+
 public class JsonObjectUtils {
 
     private JsonObjectUtils() {
@@ -11,50 +13,49 @@ public class JsonObjectUtils {
 
     public static JsonObject createRecord(String name, String description, JsonArray fields, boolean required) {
         JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder()
-                .add("type", "record")
-                .add("name", name)
-                .add("doc", description)
-                .add("namespace", "namespace")
-                .add("fields", fields);
+                .add(Constant.TYPE, Constant.RECORD)
+                .add(Constant.NAME, name)
+                .add(Constant.DOC, description)
+                .add(Constant.NAMESPACE, Constant.NAMESPACE_VALUE)
+                .add(Constant.FIELDS, fields);
 
         if (required) {
-            jsonObjectBuilder.add("default", "{}");
+            jsonObjectBuilder.add(Constant.DEFAULT, Constant.DEFAULT_RECORD);
         } else {
-            jsonObjectBuilder.add("default", JsonObject.NULL);
+            jsonObjectBuilder.add(Constant.DEFAULT, NULL);
         }
         return jsonObjectBuilder.build();
     }
 
     public static JsonObject createEnum(String parentIdentifier, JsonNode root) {
-        JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
-        root.get("enum").forEach(symbol -> jsonArrayBuilder.add(symbol.asText()));
+        JsonArrayBuilder symbols = Json.createArrayBuilder();
+        root.get(Constant.ENUM).forEach(symbol -> symbols.add(symbol.asText()));
         JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder()
-                .add("type", "enum")
-                .add("name", ConverterUtils.capitalizeWord(parentIdentifier));
-
-        if (root.has("description")) {
-            jsonObjectBuilder.add("doc", root.get("description").asText());
+                .add(Constant.TYPE, Constant.ENUM)
+                .add(Constant.NAME, ConverterUtils.capitalizeWord(parentIdentifier));
+        if (root.has(Constant.DESCRIPTION)) {
+            jsonObjectBuilder.add(Constant.DOC, root.get(Constant.DESCRIPTION).asText());
         }
-        return jsonObjectBuilder.add("symbols", jsonArrayBuilder.build()).build();
+        return jsonObjectBuilder.add(Constant.SYMBOLS, symbols.build()).build();
     }
 
     public static JsonObject createArray(JsonObject jsonObject) {
         return Json.createObjectBuilder()
-                .add("type", "array")
-                .add("items", jsonObject)
-                .add("default", "[]")
+                .add(Constant.TYPE, Constant.ARRAY)
+                .add(Constant.ITEMS, jsonObject)
+                .add(Constant.DEFAULT, Constant.DEFAULT_ARRAY)
                 .build();
     }
 
     public static JsonObject createField(String name, JsonObject jsonObject, boolean required) {
         JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder()
-                .add("name", name);
+                .add(Constant.NAME, name);
 
         if (required) {
-            jsonObjectBuilder.add("type", jsonObject);
+            jsonObjectBuilder.add(Constant.TYPE, jsonObject);
         } else {
-            jsonObjectBuilder.add("type", Json.createArrayBuilder()
-                    .add("null")
+            jsonObjectBuilder.add(Constant.TYPE, Json.createArrayBuilder()
+                    .add(Constant.NULL)
                     .add(jsonObject)
                     .build());
         }
@@ -63,12 +64,13 @@ public class JsonObjectUtils {
 
     public static JsonObject createConst(String name, String type, boolean required) {
         JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder()
-                .add("name", name);
+                .add(Constant.NAME, name);
+
         if (required) {
-            jsonObjectBuilder.add("type", type);
+            jsonObjectBuilder.add(Constant.TYPE, type);
         } else {
-            jsonObjectBuilder.add("type", Json.createArrayBuilder()
-                    .add("null")
+            jsonObjectBuilder.add(Constant.TYPE, Json.createArrayBuilder()
+                    .add(Constant.NULL)
                     .add(type)
                     .build());
         }
