@@ -49,6 +49,7 @@ public class DefinitionRepository {
                     SpecificDefinition specialDefinition = SpecificDefinitionFactory.getSpecificDefinition(entry.getKey());
                     specialDefinition.initialize(entry.getKey(), entry.getKey(), entry.getValue());
                     specificDefinitions.put(specialDefinition.getIdentifier(), specialDefinition);
+                    continue;
                 }
 
                 if (entry.getValue().has(Constant.PROPERTIES)) {

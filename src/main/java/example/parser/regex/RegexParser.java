@@ -5,6 +5,7 @@ import example.parser.IParser;
 import example.utils.Constant;
 
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public abstract class RegexParser implements IParser {
 
@@ -17,8 +18,12 @@ public abstract class RegexParser implements IParser {
         if (!property.getJsonNode().has(Constant.PATTERN)) {
             return false;
         }
-        return Pattern.compile(property.getJsonNode().get(Constant.PATTERN).asText())
-                .matcher(getReferencePattern())
-                .matches();
+        try {
+            return Pattern.compile(property.getJsonNode().get(Constant.PATTERN).asText())
+                    .matcher(getReferencePattern())
+                    .matches();
+        } catch(PatternSyntaxException patternSyntaxException) {
+            return false;
+        }
     }
 }
