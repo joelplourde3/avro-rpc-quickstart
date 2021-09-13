@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import javax.json.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static javax.json.JsonValue.NULL;
 
 public class JsonObjectUtils {
@@ -54,10 +57,8 @@ public class JsonObjectUtils {
     public static JsonObject createArray(String name, JsonObject jsonObject) {
         if (jsonObject.containsKey("type")) {
             try {
-                JsonObject innerRecord = jsonObject.getJsonObject("type");
-                jsonObject = innerRecord;
-            } catch (ClassCastException ignored) {
-            }
+                jsonObject = jsonObject.getJsonObject("type");
+            } catch (ClassCastException ignored) {}
         }
 
         JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder()
@@ -115,8 +116,6 @@ public class JsonObjectUtils {
                 .add(Constant.NAME, name);
         if (defaultObject != null) {
             jsonObjectBuilder.add(Constant.DEFAULT, defaultObject);
-        } else {
-            jsonObjectBuilder.add(Constant.DEFAULT, NULL);
         }
         return jsonObjectBuilder.build();
     }
@@ -126,11 +125,15 @@ public class JsonObjectUtils {
     // Every symbol must match the regular expression [A-Za-z_][A-Za-z0-9_]* (the same requirement as for names).
     private static JsonArray formatSymbols(JsonNode root) {
         JsonArrayBuilder formattedSymbols = Json.createArrayBuilder();
+        Set<String> symbols = new HashSet<>();
         root.get(Constant.ENUM).forEach(symbol -> {
             String txt = symbol.asText();
             txt = ConverterUtils.capitalizeWord(txt.replace("-", ""));
             txt = txt.substring(0, 1).toLowerCase() + txt.substring(1);
-            formattedSymbols.add(txt);
+            if (!symbols.contains(txt)) {
+                formattedSymbols.add(txt);
+                symbols.add(txt);
+            }
         });
         return formattedSymbols.build();
     }

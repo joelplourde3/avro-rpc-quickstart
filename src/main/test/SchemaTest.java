@@ -6,13 +6,12 @@ import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.*;
-import org.apache.avro.reflect.ReflectData;
-import org.apache.avro.reflect.ReflectDatumWriter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Appointment;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.*;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import tech.allegro.schema.json2avro.converter.JsonAvroConverter;
 
 import java.io.*;
@@ -22,7 +21,15 @@ import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(JUnit4.class)
 public class SchemaTest {
+
+    private static FhirContext fhirContext;
+
+    @BeforeClass
+    public static void initialize() {
+        fhirContext = FhirContext.forR4();
+    }
 
     @Test
     public void test_serialize_patient() throws IOException {
@@ -31,13 +38,7 @@ public class SchemaTest {
         patient.setMultipleBirth(new BooleanType(true));
         patient.addName().setFamily("Simpson").addGiven("Homer");
 
-        Schema schema = loadSchema("patient.avsc");
-        GenericRecord input = convertToRecord(patient, schema);
-        File file = serializeGenericRecord(schema, "Patient", input);
-        GenericRecord output = deserializeGenericRecord(schema, file);
-        assertEquals(input, output);
-
-        System.out.println(output);
+        assertBaseResource("Patient", patient);
     }
 
     @Test
@@ -47,9 +48,27 @@ public class SchemaTest {
         appointment.setPriority(42);
         appointment.setStart(new Date());
 
-        Schema schema = loadSchema("appointment.avsc");
-        GenericRecord input = convertToRecord(appointment, schema);
-        File file = serializeGenericRecord(schema, "Appointment", input);
+        assertBaseResource("Appointment", appointment);
+    }
+
+    @Test
+    public void test_serialize_account() throws IOException {
+        Account account = new Account();
+        account.setId("Id");
+        account.setName("NameOfTheAccount");
+
+        Period period = new Period();
+        period.setStart(new Date());
+        period.setEnd(new Date());
+        account.setServicePeriod(period);
+
+        assertBaseResource("Account", account);
+    }
+
+    private void assertBaseResource(String name, IBaseResource baseResource) throws IOException {
+        Schema schema = loadSchema(name.toLowerCase() + ".avsc");
+        GenericRecord input = convertToRecord(baseResource, schema);
+        File file = serializeGenericRecord(schema, name, input);
         GenericRecord output = deserializeGenericRecord(schema, file);
         assertEquals(input, output);
 
@@ -57,8 +76,7 @@ public class SchemaTest {
     }
 
     private String convertToJson(IBaseResource baseResource) {
-        return FhirContext.forR4()
-                .newJsonParser()
+        return fhirContext.newJsonParser()
                 .encodeResourceToString(baseResource);
     }
 

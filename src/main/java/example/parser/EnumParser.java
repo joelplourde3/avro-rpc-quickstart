@@ -27,9 +27,9 @@ public class EnumParser implements IParser {
         }
     }
 
-    // The Schema does not provide any names for the Enum except the name of the field. Except according to Avro specification,
+    // The FHIR Json Schema does not provide any names for the Enum except the name of the field. Except according to Avro specification,
     // If both entities have the same the fullname e.g: "org.foo.X", they are considered the same entity. Therefore, generates a hashcode
-    // based on the symbols.
+    // based on the symbols to avoid unwanted clash in full name.
     private String generateEnumName(Property property) {
         AtomicReference<String> content = new AtomicReference<>("");
         property.getJsonNode().get(Constant.ENUM).forEach(symbol -> content.set(content.get() + symbol.asText()));

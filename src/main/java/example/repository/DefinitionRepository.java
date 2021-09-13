@@ -1,6 +1,7 @@
 package example.repository;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import example.definition.BaseDefinition;
 import example.definition.ComplexDefinition;
 import example.definition.IDefinition;
 import example.definition.PrimitiveDefinition;
@@ -11,6 +12,9 @@ import example.utils.Constant;
 import example.utils.ConverterUtils;
 
 import javax.json.JsonObject;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class DefinitionRepository {
@@ -18,9 +22,7 @@ public class DefinitionRepository {
     private static final Map<String, PrimitiveDefinition> primitiveDefinitions = new HashMap<>();
     private static final Map<String, ComplexDefinition> complexDefinitions = new HashMap<>();
     private static final Map<String, IDefinition> specificDefinitions = new HashMap<>();
-
-    private static Map<String, List<String>> definedRecords = new HashMap<>();
-    private static Set<String> mappedRecords = new HashSet<>();
+    private static final Map<String, List<String>> definedRecords = new HashMap<>();
 
     private DefinitionRepository() {}
 
@@ -87,7 +89,7 @@ public class DefinitionRepository {
     /*
         Try to register an inner records for the root record.
         Return true, if the record is already register and therefore simply replace it by its name.
-        Else, the record has now been register, but the record schema has to be written.
+        Else, the record has to be explicitly defined.
      */
     public static boolean registerInnerRecords(String root, String innerRecord) {
         if (definedRecords.containsKey(root)) {
@@ -104,14 +106,19 @@ public class DefinitionRepository {
         return false;
     }
 
-//    public static boolean registerRecord(String identifier) {
-//        if (mappedRecords.contains(identifier)) {
-//            return true;
-//        }
-//
-//        mappedRecords.add(identifier);
-//        return false;
-//    }
+    public static void generateDefinition(String identifier) {
+        DefinitionRepository.getComplexDefinitionByIdentifier(identifier).convertToJson(identifier, identifier, true);
+        saveDefinition(DefinitionRepository.getComplexDefinitionByIdentifier(identifier));
+        definedRecords.clear();
+    }
+
+    private static void saveDefinition(BaseDefinition baseDefinition) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("./src/resources/" + baseDefinition.getName().toLowerCase() + ".avsc"))) {
+            writer.write(baseDefinition.getJsonObject().toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static Map<String, ComplexDefinition> getComplexDefinitions() {
         return complexDefinitions;

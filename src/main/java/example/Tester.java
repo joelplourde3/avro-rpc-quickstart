@@ -25,8 +25,7 @@ public class Tester {
                     continue;
                 }
 
-                DefinitionRepository.getComplexDefinitionByIdentifier(currentKey).convertToJson(currentKey, currentKey, true);
-                saveDefinition(DefinitionRepository.getComplexDefinitionByIdentifier(currentKey));
+                loadOne(currentKey);
                 supportedEntities.add(currentKey);
 
                 System.out.println("Supported Entity: " + currentKey);
@@ -40,8 +39,7 @@ public class Tester {
     }
 
     public static void loadOne(String identifier) {
-        DefinitionRepository.getComplexDefinitionByIdentifier(identifier).convertToJson(identifier, identifier, true);
-        saveDefinition(DefinitionRepository.getComplexDefinitionByIdentifier(identifier));
+        DefinitionRepository.generateDefinition(identifier);
     }
 
     private static void saveDefinition(BaseDefinition baseDefinition) {
