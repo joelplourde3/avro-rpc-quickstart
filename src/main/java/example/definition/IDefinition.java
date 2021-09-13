@@ -4,5 +4,5 @@ import javax.json.JsonObject;
 
 public interface IDefinition {
 
-    JsonObject convertToJson(String name, boolean required);
+    JsonObject convertToJson(String root, String name, boolean required);
 }

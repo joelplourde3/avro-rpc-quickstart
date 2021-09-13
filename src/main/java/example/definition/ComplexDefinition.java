@@ -2,10 +2,13 @@ package example.definition;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import example.parser.ParserServant;
+import example.repository.DefinitionRepository;
 import example.utils.Constant;
 import example.utils.JsonObjectUtils;
 
-import javax.json.*;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 import java.util.*;
 
 public class ComplexDefinition extends BaseDefinition {
@@ -44,23 +47,30 @@ public class ComplexDefinition extends BaseDefinition {
         }
     }
 
-    public JsonObject convertToJson(String name, boolean required) {
+    public JsonObject convertToJson(String root, String name, boolean required) {
         if (properties.isEmpty()) {
             generateProperties();
         }
 
         JsonArrayBuilder fields = Json.createArrayBuilder();
         for (Map.Entry<String, Property> node : properties.entrySet()) {
-            fields.add(ParserServant.parseField(node.getKey(), node.getValue()));
+            fields.add(ParserServant.parseField(root, node.getKey(), node.getValue()));
         }
 
-        // If its an inner field, capitalize the first letter. (to be discussed)
+        // If its an inner field, capitalize the first letter.
         if (getIdentifier().equalsIgnoreCase(name)) {
             name = name.substring(0, 1).toUpperCase() + name.substring(1);
         }
 
-        // TODO check this to see if we could simply re-use the JsonObject but change its name.
-        setJsonObject(JsonObjectUtils.createRecord(name, getDescription(), fields.build(), false));
+        if (root.equalsIgnoreCase(getName())) {
+            setJsonObject(JsonObjectUtils.createRecord(name, getDescription(), fields.build(), false));
+        } else {
+            if (DefinitionRepository.registerInnerRecords(root, getName())) {
+                setJsonObject(JsonObjectUtils.createRedefinedRecord(name, getName(), Json.createObjectBuilder().build()));
+            } else {
+                setJsonObject(JsonObjectUtils.createInnerRecord(getName(), getDescription(), fields.build(), false));
+            }
+        }
 
         return getJsonObject();
     }

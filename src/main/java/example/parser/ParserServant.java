@@ -18,13 +18,14 @@ public class ParserServant {
         add(new ConstantParser());
     }});
 
-    private ParserServant() {}
+    private ParserServant() {
+    }
 
-    public static JsonObject parseField(String identifier, Property property) {
+    public static JsonObject parseField(String root, String identifier, Property property) {
         return parsers.stream()
                 .filter(parser -> parser.canParse(property))
                 .findFirst()
                 .orElseThrow(() -> new UnknownParserException(identifier))
-                .parseField(identifier, property);
+                .parseField(root, identifier, property);
     }
 }

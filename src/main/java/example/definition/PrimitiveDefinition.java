@@ -14,13 +14,18 @@ public class PrimitiveDefinition extends BaseDefinition {
 
     public PrimitiveDefinition(Map.Entry<String, JsonNode> entry) {
         super(entry.getKey(), entry.getKey(), entry.getValue());
-        setType(getDefinition().get(Constant.TYPE).asText());
+        if (getDefinition().get(Constant.TYPE).asText().equals("number")) {
+            setType("int");
+        } else {
+            setType(getDefinition().get(Constant.TYPE).asText());
+        }
+
         if (getDefinition().has(Constant.PATTERN)) {
             setPattern(getDefinition().get(Constant.PATTERN).asText());
         }
     }
 
-    public JsonObject convertToJson(String name, boolean required) {
+    public JsonObject convertToJson(String root, String name, boolean required) {
         return JsonObjectUtils.createConst(name, getType(), required);
     }
 

@@ -5,7 +5,6 @@ import example.parser.regex.DecimalParser;
 import example.repository.DefinitionRepository;
 import example.utils.Constant;
 import example.utils.ConverterUtils;
-import example.utils.JsonObjectUtils;
 
 import javax.json.JsonObject;
 import java.util.ArrayList;
@@ -25,15 +24,15 @@ public class TypeParser implements IParser {
     }
 
     @Override
-    public JsonObject parseField(String identifier, Property property) {
+    public JsonObject parseField(String root, String identifier, Property property) {
         Optional<IParser> parser = innerParser.stream()
                 .filter(x -> x.canParse(property))
                 .findFirst();
         if (parser.isPresent()) {
-            return parser.get().parseField(identifier, property);
+            return parser.get().parseField(root, identifier, property);
         }
 
         String reference = ConverterUtils.parsePrimitiveType(property.getJsonNode().get(Constant.TYPE).toString());
-        return JsonObjectUtils.createField(identifier, DefinitionRepository.getPrimitiveDefinitionByIdentifier(reference).convertToJson(identifier, property.isRequired()), property.isRequired());
+        return DefinitionRepository.getPrimitiveDefinitionByIdentifier(reference).convertToJson(root, identifier, property.isRequired());
     }
 }

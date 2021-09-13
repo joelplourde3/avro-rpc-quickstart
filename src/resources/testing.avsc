@@ -1,0 +1,28 @@
+{
+  "type":"record",
+  "name":"Demo",
+  "namespace":"com.shoprunner.data.demo",
+  "fields":[
+    {
+      "name":"name",
+      "type":"string"
+    },
+    {
+      "name":"count",
+      "type":[
+        "null",
+        "int"
+      ],
+      "default":null
+    },
+    {
+      "name":"price",
+      "type":[
+        "null",
+        "float"
+      ],
+      "default":null
+    }
+  ],
+  "default": {}
+}

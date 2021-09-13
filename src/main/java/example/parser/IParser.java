@@ -8,5 +8,5 @@ public interface IParser {
 
     boolean canParse(Property property);
 
-    JsonObject parseField(String identifier, Property property);
+    JsonObject parseField(String root, String identifier, Property property);
 }

@@ -11,16 +11,16 @@ import example.utils.Constant;
 import example.utils.ConverterUtils;
 
 import javax.json.JsonObject;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class DefinitionRepository {
 
     private static final Map<String, PrimitiveDefinition> primitiveDefinitions = new HashMap<>();
     private static final Map<String, ComplexDefinition> complexDefinitions = new HashMap<>();
     private static final Map<String, IDefinition> specificDefinitions = new HashMap<>();
+
+    private static Map<String, List<String>> definedRecords = new HashMap<>();
+    private static Set<String> mappedRecords = new HashSet<>();
 
     private DefinitionRepository() {}
 
@@ -71,18 +71,47 @@ public class DefinitionRepository {
         return Optional.ofNullable(primitiveDefinitions.get(identifier)).orElseThrow(() -> new UnknownDefinitionException(identifier));
     }
 
-    public static JsonObject getReferenceObject(JsonNode node, String name, boolean required) {
+    public static JsonObject getReferenceObject(String root, JsonNode node, String name, boolean required) {
         String reference = ConverterUtils.parseReference(node);
         if (primitiveDefinitions.containsKey(reference)) {
-            return primitiveDefinitions.get(reference).convertToJson(name, required);
+            return primitiveDefinitions.get(reference).convertToJson(root, name, required);
         } else if (complexDefinitions.containsKey(reference)) {
-            return complexDefinitions.get(reference).convertToJson(name, required);
+            return complexDefinitions.get(reference).convertToJson(root, name, required);
         } else if (specificDefinitions.containsKey(reference)) {
-            return specificDefinitions.get(reference).convertToJson(name, required);
+            return specificDefinitions.get(reference).convertToJson(root, name, required);
         } else {
             throw new UnknownReferenceException(reference);
         }
     }
+
+    /*
+        Try to register an inner records for the root record.
+        Return true, if the record is already register and therefore simply replace it by its name.
+        Else, the record has now been register, but the record schema has to be written.
+     */
+    public static boolean registerInnerRecords(String root, String innerRecord) {
+        if (definedRecords.containsKey(root)) {
+            if (definedRecords.get(root).contains(innerRecord)) {
+                return true;
+            }
+
+            definedRecords.get(root).add(innerRecord);
+        } else {
+            List<String> innerRecords = new ArrayList<>();
+            innerRecords.add(innerRecord);
+            definedRecords.put(root, innerRecords);
+        }
+        return false;
+    }
+
+//    public static boolean registerRecord(String identifier) {
+//        if (mappedRecords.contains(identifier)) {
+//            return true;
+//        }
+//
+//        mappedRecords.add(identifier);
+//        return false;
+//    }
 
     public static Map<String, ComplexDefinition> getComplexDefinitions() {
         return complexDefinitions;

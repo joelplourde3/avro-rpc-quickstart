@@ -29,8 +29,5 @@ public class Constant {
 
     public static final String NULL = "null";
 
-    public static final String DEFAULT_ARRAY = "[]";
-    public static final String DEFAULT_RECORD = "{}";
-
     public static final String NAMESPACE_VALUE = "bio.ferlab.fhir";
 }

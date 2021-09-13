@@ -14,7 +14,7 @@ public class ConstantParser implements IParser {
     }
 
     @Override
-    public JsonObject parseField(String identifier, Property property) {
+    public JsonObject parseField(String root, String identifier, Property property) {
         return JsonObjectUtils.createConst(identifier, Constant.STRING, property.isRequired());
     }
 }

@@ -60,7 +60,37 @@
             <version>1.4.0</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-structures-r4</artifactId>
+            <version>5.4.2</version>
+        </dependency>
+        <dependency>
+            <groupId>tech.allegro.schema.json2avro</groupId>
+            <artifactId>converter</artifactId>
+            <version>0.2.10</version>
+        </dependency>
     </dependencies>
+
+    <!-- https://github.com/zolyfarkas/avro -->
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>github</id>-->
+<!--            <url>https://maven.pkg.github.com/zolyfarkas/*</url>-->
+<!--            <snapshots>-->
+<!--                <enabled>true</enabled>-->
+<!--            </snapshots>-->
+<!--        </repository>-->
+<!--    </repositories>-->
+<!--    <pluginRepositories>-->
+<!--        <pluginRepository>-->
+<!--            <id>github</id>-->
+<!--            <url>https://maven.pkg.github.com/zolyfarkas/*</url>-->
+<!--            <snapshots>-->
+<!--                <enabled>true</enabled>-->
+<!--            </snapshots>-->
+<!--        </pluginRepository>-->
+<!--    </pluginRepositories>-->
 
     <build>
         <plugins>
@@ -80,8 +110,8 @@
                             <goal>schema</goal>
                         </goals>
                         <configuration>
-                            <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
-                            <outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
+                            <sourceDirectory>${project.basedir}/src/main/java/</sourceDirectory>
+                            <outputDirectory>${project.basedir}/src/main/avro/</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

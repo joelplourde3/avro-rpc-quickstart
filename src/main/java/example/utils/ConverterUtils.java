@@ -1,6 +1,7 @@
 package example.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.commons.text.WordUtils;
 
 public class ConverterUtils {
 
@@ -21,6 +22,6 @@ public class ConverterUtils {
     }
 
     public static String capitalizeWord(String word) {
-        return word.substring(0, 1).toUpperCase() + word.substring(1);
+        return WordUtils.capitalize(word);
     }
 }

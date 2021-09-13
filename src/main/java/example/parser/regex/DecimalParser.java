@@ -9,7 +9,7 @@ import javax.json.JsonObject;
 public class DecimalParser extends RegexParser {
 
     @Override
-    public JsonObject parseField(String identifier, Property property) {
+    public JsonObject parseField(String root, String identifier, Property property) {
         return Json.createObjectBuilder()
                 .add(Constant.TYPE, Constant.BYTES)
                 .add(Constant.LOGICAL_TYPE, Constant.DECIMAL)

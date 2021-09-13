@@ -10,7 +10,7 @@ public class ExtensionDefinition extends SpecificDefinition {
 
     // TODO Find a way to support variable value type.
     @Override
-    public JsonObject convertToJson(String name, boolean required) {
+    public JsonObject convertToJson(String root, String name, boolean required) {
         if (getJsonObject() != null) {
             return getJsonObject();
         }

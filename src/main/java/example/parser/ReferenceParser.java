@@ -14,7 +14,7 @@ public class ReferenceParser implements IParser {
     }
 
     @Override
-    public JsonObject parseField(String identifier, Property property) {
-        return DefinitionRepository.getReferenceObject(property.getJsonNode(), identifier, property.isRequired());
+    public JsonObject parseField(String root, String identifier, Property property) {
+        return DefinitionRepository.getReferenceObject(root, property.getJsonNode(), identifier, property.isRequired());
     }
 }

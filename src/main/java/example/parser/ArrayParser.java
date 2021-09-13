@@ -23,13 +23,12 @@ public class ArrayParser implements IParser {
     }
 
     @Override
-    public JsonObject parseField(String identifier, Property property) {
-        // TODO check if this property is required or not somehow
-        Property rootProperty = new Property(property.getJsonNode().get(Constant.ITEMS), false);
-        return JsonObjectUtils.createArray(innerParser.stream()
-                .filter(parser -> parser.canParse(rootProperty))
+    public JsonObject parseField(String root, String identifier, Property property) {
+        Property items = new Property(property.getJsonNode().get(Constant.ITEMS), true);
+        return JsonObjectUtils.createArray(identifier, innerParser.stream()
+                .filter(parser -> parser.canParse(items))
                 .findFirst()
                 .orElseThrow(() -> new UnknownParserException(identifier))
-                .parseField(identifier, rootProperty));
+                .parseField(root, identifier, items));
     }
 }
