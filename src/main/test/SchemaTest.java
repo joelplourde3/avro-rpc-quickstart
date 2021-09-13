@@ -1,4 +1,7 @@
 import ca.uhn.fhir.context.FhirContext;
+import fixture.AccountFixture;
+import fixture.AppointmentFixture;
+import fixture.PatientFixture;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileWriter;
@@ -33,36 +36,17 @@ public class SchemaTest {
 
     @Test
     public void test_serialize_patient() throws IOException {
-        Patient patient = new Patient();
-        patient.setActive(true);
-        patient.setMultipleBirth(new BooleanType(true));
-        patient.addName().setFamily("Simpson").addGiven("Homer");
-
-        assertBaseResource("Patient", patient);
+        assertBaseResource("Patient", PatientFixture.createPatient());
     }
 
     @Test
     public void test_serialize_appointment() throws IOException {
-        Appointment appointment = new Appointment();
-        appointment.setDescription("This is a very good description");
-        appointment.setPriority(42);
-        appointment.setStart(new Date());
-
-        assertBaseResource("Appointment", appointment);
+        assertBaseResource("Appointment", AppointmentFixture.createAppointment());
     }
 
     @Test
     public void test_serialize_account() throws IOException {
-        Account account = new Account();
-        account.setId("Id");
-        account.setName("NameOfTheAccount");
-
-        Period period = new Period();
-        period.setStart(new Date());
-        period.setEnd(new Date());
-        account.setServicePeriod(period);
-
-        assertBaseResource("Account", account);
+        assertBaseResource("Account", AccountFixture.createAccount());
     }
 
     private void assertBaseResource(String name, IBaseResource baseResource) throws IOException {
