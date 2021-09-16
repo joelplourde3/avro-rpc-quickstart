@@ -6,10 +6,11 @@ public class IdentifierFixture {
 
     public static Identifier createIdentifier() {
         return new Identifier()
-                .setPeriod(PeriodFixture.createOngoingPeriod())
+                .setPeriod(PeriodFixture.createPlannedPeriod())
                 .setSystem("http://this-is-the-best-system-ever")
                 .setUse(Identifier.IdentifierUse.OFFICIAL)
                 .setAssigner(ReferenceFixture.createAbsoluteReference())
-                .setType(CodeableConceptFixture.createCodeableConcept());
+                .setType(CodeableConceptFixture.createCodeableConcept())
+                .setValue("IdentifierValue");
     }
 }

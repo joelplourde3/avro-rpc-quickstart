@@ -8,6 +8,7 @@ public class AddressFixture {
         return new Address()
                 .setCity("Montreal")
                 .setCountry("Canada")
-                .setPostalCode("T6Q 1S4");
+                .setPostalCode("T6Q 1S4")
+                .setPeriod(PeriodFixture.createOngoingPeriod());
     }
 }
