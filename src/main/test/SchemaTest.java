@@ -1,6 +1,7 @@
 import bio.ferlab.fhir.converter.FhirAvroConverter;
-import bio.ferlab.fhir.converter.TesterUtils;
+import bio.ferlab.fhir.converter.AvroFhirConverter;
 import bio.ferlab.fhir.schema.ExtendedJsonParser;
+import ca.uhn.fhir.context.FhirContext;
 import fixture.*;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
@@ -19,9 +20,10 @@ import tech.allegro.schema.json2avro.converter.JsonAvroConverter;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import static org.junit.Assert.assertEquals;
 
@@ -67,26 +69,33 @@ public class SchemaTest {
         GenericRecord input = FhirAvroConverter.readResource(baseResource, schema);
         File file = serializeGenericRecord(schema, name, input);
 
+        GenericRecord output = null;
         try {
-            GenericRecord output = deserializeGenericRecord(schema, file);
-            assertEquals(input, output);
-
-//            System.out.println("Input: " + input);
-//            System.out.println("Output: " + output);
-            new TesterUtils().readGenericRecord(output, Patient.class, schema);
-
-            // TesterUtils.readGenericRecord(output, Patient.class, schema);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
+            output = deserializeGenericRecord(schema, file);
+        } catch (IOException e) {
             e.printStackTrace();
         }
+
+        Patient patient = AvroFhirConverter.readGenericRecord(output, Patient.class, schema);
+
+        String inputString = FhirContext.forR4().newJsonParser().encodeResourceToString(baseResource);
+        String outputString = FhirContext.forR4().newJsonParser().encodeResourceToString(patient);
+
+        System.out.println(inputString);
+        System.out.println(outputString);
+
+        assertEquals(inputString, outputString);
+    }
+
+    @Test
+    public void testingDeque() {
+        Deque<String> deque = new ArrayDeque<>();
+
+        deque.addLast("identifier");
+        deque.addLast("period");
+        deque.addLast("start");
+
+        assertEquals("identifier.period.start", AvroFhirConverter.getAbsolutePath(deque));
     }
 
     private <K> K deserializeGenericRecord(Schema schema, File file) throws IOException {

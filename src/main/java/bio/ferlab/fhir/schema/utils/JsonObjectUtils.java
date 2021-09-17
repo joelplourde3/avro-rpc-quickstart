@@ -25,17 +25,17 @@ public class JsonObjectUtils {
                 .build();
     }
 
-    public static JsonObject createInnerRecord(String name, String description, JsonArray fields, boolean required) {
+    public static JsonObject createInnerRecord(String name, String identifier, String description, JsonArray fields, boolean required) {
         JsonObject innerRecord = Json.createObjectBuilder()
                 .add(Constant.TYPE, Constant.RECORD)
-                .add(Constant.NAME, name)
+                .add(Constant.NAME, identifier)
                 .add(Constant.DOC, formatDoc(description))
                 .add(Constant.NAMESPACE, Constant.NAMESPACE_VALUE)
                 .add(Constant.FIELDS, fields)
                 .add(Constant.DEFAULT, Json.createObjectBuilder().build())
                 .build();
         return Json.createObjectBuilder()
-                .add(Constant.NAME, name)
+                .add(Constant.NAME, name.toLowerCase())
                 .add(Constant.TYPE, innerRecord)
                 .add(Constant.DEFAULT, Json.createObjectBuilder().build())
                 .build();

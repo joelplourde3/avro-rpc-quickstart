@@ -68,7 +68,7 @@ public class ComplexDefinition extends BaseDefinition {
             if (DefinitionRepository.registerInnerRecords(root, getName())) {
                 setJsonObject(JsonObjectUtils.createRedefinedRecord(name, getName(), Json.createObjectBuilder().build()));
             } else {
-                setJsonObject(JsonObjectUtils.createInnerRecord(getName(), getDescription(), fields.build(), false));
+                setJsonObject(JsonObjectUtils.createInnerRecord(name, getName(), getDescription(), fields.build(), false));
             }
         }
 

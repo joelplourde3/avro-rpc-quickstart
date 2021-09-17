@@ -17,6 +17,6 @@ public class ReferenceDefinition extends SpecificDefinition {
                 .add(JsonObjectUtils.createConst("identifier", Constant.STRING, false))
                 .add(JsonObjectUtils.createConst("display", Constant.STRING, false))
                 .build();
-        return JsonObjectUtils.createInnerRecord(name, "A Reference", fields, required);
+        return JsonObjectUtils.createInnerRecord(name, name, "A Reference", fields, required);
     }
 }

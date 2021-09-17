@@ -16,6 +16,6 @@ public class XHtmlDefinition extends SpecificDefinition {
                 .add(JsonObjectUtils.createConst("url", Constant.STRING, false))
                 .add(JsonObjectUtils.createConst("valueString", Constant.STRING, false))
                 .build();
-        return JsonObjectUtils.createInnerRecord(name, "", fields, required);
+        return JsonObjectUtils.createInnerRecord(name, name, "", fields, required);
     }
 }
