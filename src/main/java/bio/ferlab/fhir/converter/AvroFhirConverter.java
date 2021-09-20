@@ -3,37 +3,27 @@ package bio.ferlab.fhir.converter;
 import bio.ferlab.fhir.converter.exception.AvroConversionException;
 import bio.ferlab.fhir.converter.exception.UnionTypeException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.util.TerserUtilHelper;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericArray;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.text.WordUtils;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Property;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static bio.ferlab.fhir.converter.ConverterUtils.navigatePath;
 
 public class AvroFhirConverter {
 
     private AvroFhirConverter() {}
 
     public static <T extends BaseResource> T readGenericRecord(GenericRecord genericRecord, Class<T> type, Schema schema) {
-        T instance;
-        try {
-            instance = type.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Something happened .. ?");
-        }
-
-        FhirContext fhirContext = FhirContext.forR4();
-        RuntimeResourceDefinition resourceDefinition = FhirContext.forR4().getResourceDefinition(instance);
-        TerserUtilHelper helper = TerserUtilHelper.newHelper(fhirContext, resourceDefinition.getName());
-
+        TerserUtilHelper helper = TerserUtilHelper.newHelper(FhirContext.forR4(), type.getSimpleName());
         read(helper, null, schema, genericRecord, new ArrayDeque<>());
-
         return helper.getResource();
     }
 
@@ -91,13 +81,19 @@ public class AvroFhirConverter {
 
     protected static void readArray(TerserUtilHelper helper, Schema.Field field, Schema schema, Object value, Deque<String> path) {
         if (!(value instanceof GenericArray)) {
-            throw new RuntimeException("Something is wrong, please verify this.");
+            throw new AvroConversionException("Something is wrong, please verify this.");
         }
 
-        ((GenericArray) value).forEach(x -> {
-            read(helper, field, schema.getElementType(), x, path);
+        for (Object element : (GenericArray) value) {
+            if (element instanceof GenericRecord) {
+                helper.getTerser().addElement(helper.getResource(), navigatePath(path));
+            } else {
+                helper.getTerser().addElement(helper.getResource(), navigatePath(path), element.toString());
+            }
+            read(helper, field, schema.getElementType(), element, path);
             path.addLast(field.name());
-        });
+        }
+
         path.removeLast();
     }
 
@@ -105,7 +101,8 @@ public class AvroFhirConverter {
         for (Schema type : schema.getTypes()) {
             try {
                 read(helper, field, type, value, path);
-            } catch (UnionTypeException ignored) {}
+            } catch (UnionTypeException ignored) {
+            }
         }
     }
 
@@ -115,7 +112,9 @@ public class AvroFhirConverter {
                 readType(helper, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").format(new Date((Long) value * 1000)), path);
                 return;
             case "date":
-                readType(helper, new SimpleDateFormat("yyyy-MM-dd").format(new Date((Integer) value * 86400000L)), path);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                readType(helper, simpleDateFormat.format(new Date((Integer) value * 86400000L)), path);
                 return;
             default:
                 readType(helper, value.toString(), path);
@@ -123,23 +122,24 @@ public class AvroFhirConverter {
     }
 
     protected static void readType(TerserUtilHelper helper, String value, Deque<String> path) {
-        String absolutePath = getAbsolutePath(path);
-        helper.setField(absolutePath, value);
+        String absolutePath = navigatePath(path);
+        List<IBase> elements = helper.getTerser().getValues(helper.getResource(), absolutePath);
+
+        if (elements.isEmpty()) {
+            helper.setField(absolutePath, value);
+        } else {
+            // Get the parent of the element, not the element itself.
+            String relativePath = navigatePath(path, path.size() - 1);
+            elements = helper.getTerser().getValues(helper.getResource(), relativePath);
+            for (IBase childrenElement : elements) {
+                Property property = ((Base) childrenElement).getChildByName(path.getLast());
+
+                // Ignore all the primitive values.
+                if (property != null && !property.hasValues()) {
+                    helper.getTerser().setElement(childrenElement, path.getLast(), value);
+                }
+            }
+        }
         path.removeLast();
-    }
-
-    public static String getAbsolutePath(Deque<String> path) {
-        StringBuilder absolutePath = new StringBuilder();
-        Iterator<String> itr = path.iterator();
-
-        if (itr.hasNext()) {
-            absolutePath.append(WordUtils.uncapitalize(itr.next()));
-        }
-
-        while (itr.hasNext()) {
-            absolutePath.append(".");
-            absolutePath.append(WordUtils.uncapitalize(itr.next()));
-        }
-        return absolutePath.toString();
     }
 }
